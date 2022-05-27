@@ -16,6 +16,21 @@ const client = new MongoClient(uri, {
   serverApi: ServerApiVersion.v1,
 });
 
+function verifyJWT(req, res, next) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) {
+    return res.status(401).send({ message: "UnAuthorization Access" });
+  }
+  const token = authHeader.split(" ")[1];
+  jwt.verify(token, process.env.ACCESS_TOKEN, function (err, decoded) {
+    if (err) {
+      return res.status(403).send({ message: "Forbiden Access" });
+    }
+    req.decoded = decoded;
+    next();
+  });
+}
+
 async function run() {
   try {
     await client.connect();
@@ -34,6 +49,7 @@ async function run() {
       res.send(parts);
     });
 
+    // parts gets id
     app.get("/parts/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
@@ -41,8 +57,20 @@ async function run() {
       res.send(purchase);
     });
 
-    // parts booking Post
+    // parts booking get
+    app.get("/booking", verifyJWT, async (req, res) => {
+      const email = req.query.email;
+      const decodedEmail = req.decoded.email;
+      if (email === decodedEmail) {
+        const query = { email: email };
+        const bookings = await bookingCollection.find(query).toArray();
+        return res.send(bookings);
+      } else {
+        return res.status(403).send({ message: "Forbiden Access" });
+      }
+    });
 
+    // parts booking Post
     app.post("/booking", async (req, res) => {
       const parts = req.body;
       const result = await bookingCollection.insertOne(parts);
@@ -50,7 +78,6 @@ async function run() {
     });
 
     // add review post
-
     app.post("/review", async (req, res) => {
       const reviews = req.body;
       const result = await reviewCollection.insertOne(reviews);
@@ -58,7 +85,6 @@ async function run() {
     });
 
     // get review
-
     app.get("/review", async (req, res) => {
       const query = {};
       const cursor = reviewCollection.find(query);
@@ -66,8 +92,24 @@ async function run() {
       res.send(reviews);
     });
 
-    // users put
+    // get users
+    app.get("/user", verifyJWT, async (req, res) => {
+      const users = await userCollection.find().toArray();
+      res.send(users);
+    });
 
+    // users admin
+    app.put("/user/admin/:email", async (req, res) => {
+      const email = req.params.email;
+      const filter = { email: email };
+      const updateDoc = {
+        $set: { role: "admin" },
+      };
+      const result = await userCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    });
+
+    // users put
     app.put("/user/:email", async (req, res) => {
       const email = req.params.email;
       const user = req.body;
