@@ -39,6 +39,7 @@ async function run() {
     const bookingCollection = client.db("manufacture").collection("booking");
     const reviewCollection = client.db("manufacture").collection("review");
     const userCollection = client.db("manufacture").collection("users");
+    const profileCollection = client.db("manufacture").collection("profile");
 
     // parts get
 
@@ -99,14 +100,22 @@ async function run() {
     });
 
     // users admin
-    app.put("/user/admin/:email", async (req, res) => {
+    app.put("/user/admin/:email", verifyJWT, async (req, res) => {
       const email = req.params.email;
-      const filter = { email: email };
-      const updateDoc = {
-        $set: { role: "admin" },
-      };
-      const result = await userCollection.updateOne(filter, updateDoc);
-      res.send(result);
+      const requester = req.decoded.email;
+      const requesterAcount = await userCollection.findOne({
+        email: requester,
+      });
+      if (requesterAcount.role === "admin") {
+        const filter = { email: email };
+        const updateDoc = {
+          $set: { role: "admin" },
+        };
+        const result = await userCollection.updateOne(filter, updateDoc);
+        res.send(result);
+      } else {
+        res.status(403).send({ message: "Forbiden Access" });
+      }
     });
 
     // users put
@@ -120,8 +129,23 @@ async function run() {
       };
       const result = await userCollection.updateOne(filter, updateDoc, options);
       const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN, {
-        expiresIn: "1h",
+        expiresIn: "2h",
       });
+
+      // profile post
+      app.put("/profile", async (req, res) => {
+        const profiles = req.body;
+        const result = await profileCollection.updateOne(profiles);
+        res.send(result);
+      });
+      // profile get
+      app.get("/profile", async (req, res) => {
+        const query = {};
+        const cursor = profileCollection.find(query);
+        const update = await cursor.toArray();
+        res.send(update);
+      });
+
       res.send({ result, token });
     });
   } finally {
