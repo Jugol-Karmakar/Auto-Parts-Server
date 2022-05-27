@@ -42,7 +42,6 @@ async function run() {
     const profileCollection = client.db("manufacture").collection("profile");
 
     // parts get
-
     app.get("/parts", async (req, res) => {
       const query = {};
       const cursor = partsCollection.find(query);
@@ -136,7 +135,7 @@ async function run() {
       };
       const result = await userCollection.updateOne(filter, updateDoc, options);
       const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN, {
-        expiresIn: "2h",
+        expiresIn: "3h",
       });
 
       // profile post
@@ -145,6 +144,7 @@ async function run() {
         const result = await profileCollection.updateOne(profiles);
         res.send(result);
       });
+
       // profile get
       app.get("/profile", async (req, res) => {
         const query = {};
