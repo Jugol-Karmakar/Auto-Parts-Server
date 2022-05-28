@@ -59,6 +59,13 @@ async function run() {
       res.send(purchase);
     });
 
+    // parts post
+    app.post("/parts", async (req, res) => {
+      const parts = req.body;
+      const result = await partsCollection.insertOne(parts);
+      res.send(result);
+    });
+
     // parts booking get
     app.get("/booking", verifyJWT, async (req, res) => {
       const email = req.query.email;
