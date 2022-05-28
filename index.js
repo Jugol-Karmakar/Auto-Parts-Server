@@ -145,13 +145,13 @@ async function run() {
         res.send(result);
       });
 
-      // profile get
-      app.get("/profile", async (req, res) => {
-        const query = {};
-        const cursor = profileCollection.find(query);
-        const update = await cursor.toArray();
-        res.send(update);
-      });
+      // // profile get
+      // app.get("/profile", async (req, res) => {
+      //   const query = {};
+      //   const cursor = profileCollection.find(query);
+      //   const update = await cursor.toArray();
+      //   res.send(update);
+      // });
 
       res.send({ result, token });
     });
