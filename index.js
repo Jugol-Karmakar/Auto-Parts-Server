@@ -186,11 +186,20 @@ async function run() {
         expiresIn: "3h",
       });
 
-      // profile post
+      // profile put
       app.put("/profile", async (req, res) => {
-        const profiles = req.body;
-        const result = await profileCollection.updateOne(profiles);
-        res.send(result);
+        const user = req.body;
+        const filter = { email: email };
+        const options = { upsert: true };
+        const updateDoc = {
+          $set: user,
+        };
+        const updateProfile = await profileCollection.updateOne(
+          filter,
+          updateDoc,
+          options
+        );
+        res.send(updateProfile);
       });
 
       // // profile get
