@@ -196,7 +196,8 @@ async function run() {
       });
 
       // profile put
-      app.put("/profile", async (req, res) => {
+      app.put("/profile/:email", async (req, res) => {
+        const email = req.params.email;
         const user = req.body;
         const filter = { email: email };
         const options = { upsert: true };
