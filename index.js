@@ -40,7 +40,6 @@ async function run() {
     const bookingCollection = client.db("manufacture").collection("booking");
     const reviewCollection = client.db("manufacture").collection("review");
     const userCollection = client.db("manufacture").collection("users");
-    const profileCollection = client.db("manufacture").collection("profile");
     const paymentCollection = client.db("manufacture").collection("payments");
 
     // parts get
@@ -196,7 +195,7 @@ async function run() {
       });
 
       // profile put
-      app.put("/profile/:email", async (req, res) => {
+      app.put("/user/:email", async (req, res) => {
         const email = req.params.email;
         const user = req.body;
         const filter = { email: email };
@@ -211,6 +210,13 @@ async function run() {
         );
         console.log(updateProfile);
         res.send(updateProfile);
+      });
+
+      app.get("/user/:email", verifyJWT, async (req, res) => {
+        const email = req.params.email;
+        const filter = { email: email };
+        const user = await userCollection.findOne(filter);
+        res.send(user);
       });
 
       res.send({ result, token });
