@@ -204,7 +204,7 @@ async function run() {
         const updateDoc = {
           $set: user,
         };
-        const updateProfile = await profileCollection.updateOne(
+        const updateProfile = await userCollection.updateOne(
           filter,
           updateDoc,
           options
