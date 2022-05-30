@@ -40,6 +40,7 @@ async function run() {
     const bookingCollection = client.db("manufacture").collection("booking");
     const reviewCollection = client.db("manufacture").collection("review");
     const userCollection = client.db("manufacture").collection("users");
+    const profileCollection = client.db("manufacture").collection("profile");
     const paymentCollection = client.db("manufacture").collection("payments");
 
     // parts get
@@ -192,31 +193,6 @@ async function run() {
       const result = await userCollection.updateOne(filter, updateDoc, options);
       const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN, {
         expiresIn: "3h",
-      });
-
-      // profile put
-      app.put("/user/:email", async (req, res) => {
-        const email = req.params.email;
-        const user = req.body;
-        const filter = { email: email };
-        const options = { upsert: true };
-        const updateDoc = {
-          $set: user,
-        };
-        const updateProfile = await userCollection.updateOne(
-          filter,
-          updateDoc,
-          options
-        );
-        console.log(updateProfile);
-        res.send(updateProfile);
-      });
-
-      app.get("/user/:email", verifyJWT, async (req, res) => {
-        const email = req.params.email;
-        const filter = { email: email };
-        const user = await userCollection.findOne(filter);
-        res.send(user);
       });
 
       res.send({ result, token });
