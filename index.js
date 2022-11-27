@@ -59,6 +59,13 @@ async function run() {
       res.send(purchase);
     });
 
+    // add post parts
+    app.post("/parts", async (req, res) => {
+      const reviews = req.body;
+      const result = await partsCollection.insertOne(reviews);
+      res.send(result);
+    });
+
     // parts booking post
     app.post("/booking", async (req, res) => {
       const parts = req.body;
@@ -125,6 +132,14 @@ async function run() {
       const email = req.params.email;
       const query = { email: email };
       const result = await userCollection.findOne(query);
+      res.send(result);
+    });
+
+    // delete parts
+    app.delete("/parts/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await partsCollection.deleteOne(query);
       res.send(result);
     });
   } finally {
