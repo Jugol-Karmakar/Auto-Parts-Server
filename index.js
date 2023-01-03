@@ -40,7 +40,6 @@ async function run() {
     const bookingCollection = client.db("manufacture").collection("booking");
     const reviewCollection = client.db("manufacture").collection("review");
     const userCollection = client.db("manufacture").collection("users");
-    const profileCollection = client.db("manufacture").collection("profile");
     const paymentCollection = client.db("manufacture").collection("payments");
 
     // parts get
@@ -81,6 +80,14 @@ async function run() {
       return res.send(bookings);
     });
 
+    // parts booking get by id
+    app.get("/booking/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const booking = await bookingCollection.findOne(query);
+      res.send(booking);
+    });
+
     // add review post
     app.post("/review", async (req, res) => {
       const reviews = req.body;
@@ -94,6 +101,22 @@ async function run() {
       const cursor = reviewCollection.find(query);
       const reviews = await cursor.toArray();
       res.send(reviews);
+    });
+
+    // put user with token
+    app.put("/user/:email", async (req, res) => {
+      const email = req.params.email;
+      const user = req.body;
+      const filter = { email: email };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: user,
+      };
+      const result = await userCollection.updateOne(filter, updateDoc, options);
+      const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN, {
+        expiresIn: "5h",
+      });
+      res.send({ result, token });
     });
 
     // get users
@@ -132,6 +155,14 @@ async function run() {
       const email = req.params.email;
       const query = { email: email };
       const result = await userCollection.findOne(query);
+      res.send(result);
+    });
+
+    // delete user
+    app.delete("/user/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const result = await userCollection.deleteOne(query);
       res.send(result);
     });
 
