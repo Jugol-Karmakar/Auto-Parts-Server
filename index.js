@@ -173,6 +173,39 @@ async function run() {
       const result = await partsCollection.deleteOne(query);
       res.send(result);
     });
+
+    // payment booking id patch
+    app.patch("/booking/:id", async (req, res) => {
+      const id = req.params.id;
+      const payment = req.body;
+      const filter = { _id: ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          paid: true,
+          transactionId: payment.transaction,
+        },
+      };
+      const updateBooking = await bookingCollection.updateOne(
+        filter,
+        updateDoc
+      );
+      const result = await paymentCollection.insertOne(payment);
+      res.send(updateDoc);
+    });
+
+    // payment intent
+    app.post("/create-payment-intent", async (req, res) => {
+      const { price } = req.body;
+      const amount = price * 100;
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: amount,
+        currency: "usd",
+        payment_method_types: ["card"],
+      });
+      res.send({
+        clientSecret: paymentIntent.client_secret,
+      });
+    });
   } finally {
     //   await client.close()
   }
