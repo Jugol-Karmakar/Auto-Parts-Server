@@ -219,10 +219,6 @@ app.get("/", (req, res) => {
   res.send("manufacturer parts service");
 });
 
-app.get("*", (req, res) => {
-  res.send("No route found");
-});
-
 app.listen(port, () => {
   console.log(`manufacture app listening on port ${port}`);
 });
